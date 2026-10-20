@@ -197,7 +197,7 @@ export default function Home() {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              Vercel
+              GitHub Pages
             </div>
 
           </div>
@@ -230,7 +230,7 @@ export default function Home() {
             </div>
 
             <div className="shadow rounded-xl p-6">
-              Vercel Deploy
+              Despliegue en GitHub Pages
             </div>
 
           </div>
