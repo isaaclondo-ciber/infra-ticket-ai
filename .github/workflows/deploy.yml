@@ -1,0 +1,155 @@
+name: Despliegue
+
+# Publica en GitHub Pages solo cuando el CI de main termina en verde, y después prueba la URL publicada.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      zap_modo:
+        description: "Escaneo de ZAP"
+        type: choice
+        options: [baseline, completo]
+        default: baseline
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  JMETER_VERSION: "5.6.3"
+  JMETER_SHA512: "5978a1a35edb5a7d428e270564ff49d2b1b257a65e17a759d259a9283fc17093e522fe46f474a043864aea6910683486340706d745fcdf3db1505fd71e689083"
+
+jobs:
+  build:
+    name: Build para Pages
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Build (export estático)
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          npm ci
+          npm run build
+          touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    outputs:
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v5
+
+  jmeter:
+    name: Carga y estrés (JMeter)
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar JMeter
+        run: |
+          archivo="apache-jmeter-${JMETER_VERSION}.tgz"
+          curl -sSfLO "https://archive.apache.org/dist/jmeter/binaries/${archivo}"
+          echo "${JMETER_SHA512}  ${archivo}" | sha512sum -c -
+          tar -xzf "${archivo}"
+          echo "$PWD/apache-jmeter-${JMETER_VERSION}/bin" >> "$GITHUB_PATH"
+
+      - name: Correr plan de carga
+        env:
+          URL: ${{ needs.deploy.outputs.url }}
+        run: |
+          sin_esquema="${URL#https://}"
+          host="${sin_esquema%%/*}"
+          ruta="/${sin_esquema#*/}"
+          jmeter -n -t tests/jmeter/carga-landing.jmx \
+            -Jhost="$host" -Jruta="$ruta" -Jusuarios=100 -Jrampa=10 \
+            -l resultados.jtl -e -o reporte-jmeter
+
+      - name: Revisar tasa de error
+        run: |
+          errores=$(jq '.Total.errorPct' reporte-jmeter/statistics.json)
+          echo "### JMeter: ${errores} % de error" >> "$GITHUB_STEP_SUMMARY"
+          awk -v e="$errores" 'BEGIN { exit (e > 0) }'
+
+      - name: Guardar reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-jmeter
+          path: |
+            resultados.jtl
+            reporte-jmeter/
+
+  zap:
+    name: Vulnerabilidades (OWASP ZAP)
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Escaneo baseline
+        if: inputs.zap_modo != 'completo'
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: ${{ needs.deploy.outputs.url }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-I"
+          allow_issue_writing: false
+          artifact_name: reporte-zap
+
+      - name: Escaneo completo (spider + activo)
+        if: inputs.zap_modo == 'completo'
+        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
+        with:
+          target: ${{ needs.deploy.outputs.url }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-I"
+          allow_issue_writing: false
+          artifact_name: reporte-zap
+
+      # Criterio de la sección 19.4: ninguna alerta de riesgo alto.
+      - name: Revisar alertas altas
+        run: |
+          altas=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' report_json.json)
+          echo "### ZAP: ${altas} alertas altas" >> "$GITHUB_STEP_SUMMARY"
+          test "$altas" -eq 0
