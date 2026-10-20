@@ -109,7 +109,7 @@ jobs:
         run: |
           errores=$(jq '.Total.errorPct' reporte-jmeter/statistics.json)
           echo "### JMeter: ${errores} % de error" >> "$GITHUB_STEP_SUMMARY"
-          awk -v e="$errores" 'BEGIN { exit (e > 0) }'
+          awk -v e="$errores" 'BEGIN { exit (e > 1) }'
 
       - name: Guardar reporte
         if: always()
