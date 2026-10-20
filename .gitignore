@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pruebas
+__pycache__/
+.venv/
+.pytest_cache/
+tests/jmeter/resultados/
+tests/jmeter/reporte/
+jmeter.log

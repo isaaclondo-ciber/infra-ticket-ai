@@ -1,0 +1,158 @@
+{
+  "id": "28ebcc93-797a-4e63-96d8-c37272997874",
+  "version": "2.0",
+  "name": "Infra Ticket AI landing",
+  "url": "http://localhost:3000",
+  "tests": [
+    {
+      "id": "49e1a38b-2e7f-405d-b443-9f8626fc85db",
+      "name": "Visitante recorre la landing",
+      "commands": [
+        {
+          "id": "d2fd7841-e679-488f-a28e-1433ed13489a",
+          "comment": "",
+          "command": "open",
+          "target": "/",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "7d492e15-e950-4708-9612-9c69355a6d0c",
+          "comment": "",
+          "command": "setWindowSize",
+          "target": "1366x900",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "3a55a102-f125-4195-8725-f0d2a234f6a9",
+          "comment": "",
+          "command": "assertTitle",
+          "target": "Infra Ticket AI | Automatización inteligente de solicitudes de infraestructura",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "b3aa711b-785d-477c-840b-ae505e5c5694",
+          "comment": "",
+          "command": "assertText",
+          "target": "css=h1",
+          "targets": [],
+          "value": "Automatización Inteligente de Solicitudes de Infraestructura"
+        },
+        {
+          "id": "4e151f77-f1df-40a8-bcd3-f107499e5f6e",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Descripción del Proyecto']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "7c633eeb-fc5d-4001-a4a0-33335a50a42d",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Problemática']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "91ad4117-a622-4086-97c1-feec301bd0ea",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Objetivos']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "3615cfe9-fc1a-4cba-b251-97109e19892f",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Arquitectura de la Solución']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "46997e75-8b61-4d5c-8aad-abdd815a33a7",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Flujo de Trabajo']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "a7149276-4bc0-498a-9e04-3ac981d58a9c",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Tecnologías Utilizadas']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "122ebe78-e27e-4ca1-8b33-f86710769537",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='DevSecOps y Seguridad']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "9f9e6124-bf16-4e4c-9284-0bcc55ebd1af",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Resultados Esperados']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "5400b982-3b93-4ae4-8b34-6b9a5eb45ecd",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Equipo de Trabajo']",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "e7a039b6-87c3-47d0-9b58-cb6095f0fefd",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "xpath=//h2[normalize-space()='Flujo de Trabajo']/following-sibling::ol/li[6]",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "779ef257-28db-43df-a9d0-77d61803f4e7",
+          "comment": "",
+          "command": "runScript",
+          "target": "window.scrollTo(0, document.body.scrollHeight)",
+          "targets": [],
+          "value": ""
+        },
+        {
+          "id": "8206f1b8-60d0-4c4f-871c-6678c8ff1fc7",
+          "comment": "",
+          "command": "assertElementPresent",
+          "target": "css=footer",
+          "targets": [],
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "id": "029c2bbe-0a1f-4c47-a361-d3c3872eca44",
+      "name": "Landing",
+      "persistSession": false,
+      "parallel": false,
+      "timeout": 300,
+      "tests": [
+        "49e1a38b-2e7f-405d-b443-9f8626fc85db"
+      ]
+    }
+  ],
+  "urls": [
+    "http://localhost:3000/"
+  ],
+  "plugins": []
+}
